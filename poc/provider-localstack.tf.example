@@ -1,0 +1,40 @@
+# LocalStack Provider Configuration
+# Rename this file to provider-localstack.tf to use LocalStack
+# This will override the default provider in main.tf
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+
+  # LocalStack endpoints
+  endpoints {
+    s3             = "http://localhost:4566"
+    dynamodb       = "http://localhost:4566"
+    apigateway     = "http://localhost:4566"
+    cognitoidp     = "http://localhost:4566"
+    iam            = "http://localhost:4566"
+    lambda         = "http://localhost:4566"
+    cloudwatch     = "http://localhost:4566"
+    cloudwatchlogs = "http://localhost:4566"
+  }
+
+  # LocalStack credentials (dummy values)
+  access_key = "test"
+  secret_key = "test"
+
+  # Skip AWS-specific validations
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+  skip_requesting_account_id  = true
+
+  # Disable SSL verification for LocalStack
+  s3_use_path_style = true
+}

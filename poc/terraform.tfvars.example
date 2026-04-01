@@ -1,0 +1,28 @@
+# Example Terraform variables for AWS deployment
+# Copy this file to terraform.tfvars and update with your values
+
+# AWS Region
+aws_region = "us-east-1"
+
+# S3 Website Bucket
+# Note: S3 bucket names must be globally unique
+# Update this to a unique name for your deployment
+website_bucket_name = "hr-database-linktree-poc-YOUR-UNIQUE-ID"
+
+# DynamoDB Table
+dynamodb_table_name = "hr-database-poc"
+
+# Cognito User Pool
+cognito_user_pool_name = "hr-database-users-poc"
+
+# API Gateway
+api_gateway_name = "hr-database-api-poc"
+
+# Project Tags
+project_tags = {
+  Project     = "hr-database-linktree"
+  Environment = "POC"
+  ManagedBy   = "Terraform"
+  Owner       = "Your Name"
+  CostCenter  = "Development"
+}
