@@ -3,10 +3,10 @@ name: OpenTofu Infrastructure
 on:
   push:
     branches: [master]
-    paths: ['poc/**']
+    paths: ['poc/**', '.github/workflows/tofu.yml']
   pull_request:
     branches: [master]
-    paths: ['poc/**']
+    paths: ['poc/**', '.github/workflows/tofu.yml']
 
 permissions:
   id-token: write
