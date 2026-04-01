@@ -1,0 +1,94 @@
+name: OpenTofu Infrastructure
+
+on:
+  push:
+    branches: [master]
+    paths: ['poc/**']
+  pull_request:
+    branches: [master]
+    paths: ['poc/**']
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  AWS_REGION: us-east-1
+  TOFU_VERSION: 1.11.5
+  WORKING_DIR: poc
+
+jobs:
+  plan:
+    name: Tofu Plan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::585008066476:role/github-actions-opentofu-modules
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+
+      - name: Tofu Init
+        run: tofu init -input=false
+        working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Tofu Plan
+        id: plan
+        run: tofu plan -no-color -input=false
+        working-directory: ${{ env.WORKING_DIR }}
+        continue-on-error: true
+
+      - name: Comment plan on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `#### OpenTofu Plan 📖
+            \`\`\`
+            ${{ steps.plan.outputs.stdout || 'Plan output not captured' }}
+            \`\`\`
+            *Pushed by: @${{ github.actor }}*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name: Fail if plan failed
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+  apply:
+    name: Tofu Apply
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::585008066476:role/github-actions-opentofu-modules
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+
+      - name: Tofu Init
+        run: tofu init -input=false
+        working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Tofu Apply
+        run: tofu apply -auto-approve -input=false
+        working-directory: ${{ env.WORKING_DIR }}
