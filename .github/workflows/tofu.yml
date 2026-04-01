@@ -37,6 +37,13 @@ jobs:
         with:
           tofu_version: ${{ env.TOFU_VERSION }}
 
+      - name: Create placeholder Lambda zip
+        run: |
+          mkdir -p ../../backend/dist
+          echo 'exports.handler = async () => ({ statusCode: 200, body: "placeholder" });' > ../../backend/dist/index.js
+          cd ../../backend/dist && zip -q lambda.zip index.js
+        working-directory: ${{ env.WORKING_DIR }}
+
       - name: Tofu Init
         run: tofu init -input=false
         working-directory: ${{ env.WORKING_DIR }}
@@ -84,6 +91,13 @@ jobs:
         uses: opentofu/setup-opentofu@v1
         with:
           tofu_version: ${{ env.TOFU_VERSION }}
+
+      - name: Create placeholder Lambda zip
+        run: |
+          mkdir -p ../../backend/dist
+          echo 'exports.handler = async () => ({ statusCode: 200, body: "placeholder" });' > ../../backend/dist/index.js
+          cd ../../backend/dist && zip -q lambda.zip index.js
+        working-directory: ${{ env.WORKING_DIR }}
 
       - name: Tofu Init
         run: tofu init -input=false
